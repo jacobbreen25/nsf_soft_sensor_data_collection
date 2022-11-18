@@ -1,7 +1,8 @@
 /*
+* Name: six_capacitive_sensor_bluetooth
 * Purpose: The purpose of this program is to controll a peripheral device(Flexible Sensor Board) and send that data to a Server(PC)
 * Author: Jacob Breen
-* Date Started: 11/10/22
+* Date Started: 11/11/22
 * Date Last Worked on: 11/15/22
 *
 * Version: 00.00.01
@@ -23,8 +24,6 @@
 // 2.1 Control driver's high-level behavior
 bool use_mpr = true; // **USER** True: read from MPR. False: read from Faboratory circuit
 bool print_verbose = false; // **USER** True: display the time elapsed since starting (in milliseconds). False: don't display time elapsed.
-const int NUM_SENSORS = 1; // **USER** How many sensors will you use? If you are using Faboratory boards, you will need one Faboratory PCB for each sensor, and you need to add the addresses to the int array below, named "sensor_addresses". Each MPR121 PCB can connect to 12 sensors without needing to modify the rest of this code.
-int sensor_addresses[NUM_SENSORS] = {0}; // **USER** Faboratory Sensor addresses. Not used if "use_mpr" is true.
 
 // 2.2. General Variables. No need to modify these.
 unsigned long initial_time = 0.0; // The time after setup
@@ -36,12 +35,12 @@ Adafruit_MPR121 cap = Adafruit_MPR121(); // An MPR121 object. Can initialize mor
 //create the service that will send data to the arduino
 BLEService MessageService("eb523250-6513-11ed-9c9d-0800200c9a66"); 
 //create the characteristics that will be used to send the data through bluetooth and initialize tham as Readable and Notifyable
-BLEFloatCharacteristic float_1("eb523251-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
-BLEFloatCharacteristic float_2("eb523252-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
-BLEFloatCharacteristic float_3("eb523253-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
-BLEFloatCharacteristic float_4("eb523254-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
-BLEFloatCharacteristic float_5("eb523255-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
-BLEFloatCharacteristic float_6("eb523256-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
+BLEIntCharacteristic int_1("eb523251-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
+BLEIntCharacteristic int_2("eb523252-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
+BLEIntCharacteristic int_3("eb523253-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
+BLEIntCharacteristic int_4("eb523254-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
+BLEIntCharacteristic int_5("eb523255-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
+BLEIntCharacteristic int_6("eb523256-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify);
 
 
 // ***** 3. Set up Arduino *****
@@ -86,56 +85,38 @@ void setup() {
   BLE.setDeviceName("FlexibleSensorBLE");
   BLE.setLocalName("FlexibleSensorBLE");
   //Adds the data as characteristics so it can be sent using GATT bluetooth protocol
-  MessageService.addCharacteristic(float_1);
-  MessageService.addCharacteristic(float_2);
-  MessageService.addCharacteristic(float_3);
-  MessageService.addCharacteristic(float_4);
-  MessageService.addCharacteristic(float_5);
-  MessageService.addCharacteristic(float_6);
+  MessageService.addCharacteristic(int_1);
+  MessageService.addCharacteristic(int_2);
+  MessageService.addCharacteristic(int_3);
+  MessageService.addCharacteristic(int_4);
+  MessageService.addCharacteristic(int_5);
+  MessageService.addCharacteristic(int_6);
   //Add the service to the bluetooth.
   BLE.addService(MessageService);
   //Adverts the bluetooth 
   BLE.advertise();
-  SerialUSB.println("Nano is waiting for connections...");
+  SerialUSB.println("\nNano is waiting for connections...");
 }
 
 // ***** 4. Read sensors and send to PC over Bluetooth, forever *****
 void loop() {
+  int value;
   // 4.1 Print current time, increment sample number
   if (print_verbose) {
     SerialUSB.print(current_time); SerialUSB.print('\t'); // Print time elapsed since setup finished
   }
   sample_number++; // Increment sample number
-
+  //SerialUSB.println("test");
 
   // 4.2 Read from sensors, depending on the value of "use_mpr" (set at the beginning of this script)
-   for (int sensor = 0; sensor < NUM_SENSORS; sensor++) {
-    float temp_sensor = 0;
-    // MPR
-    if (use_mpr){ 
- //     temp_sensor = cap.filteredData(sensor); 
-//        Serial.print(cap.filteredData(0)); Serial.print('\t');
-//        Serial.print(cap.filteredData(4)); Serial.print('\t');
-//       Serial.print(cap.filteredData(5)); Serial.print('\t');
-//        Serial.print(cap.filteredData(6)); Serial.print('\t');
-        SerialUSB.print(cap.filteredData(0)); Serial.print('\t');
-        SerialUSB.print(cap.filteredData(1)); Serial.print('\t');
-        SerialUSB.print(cap.filteredData(2)); Serial.print('\t');
-        SerialUSB.print(cap.filteredData(3)); Serial.print('\t');
-        SerialUSB.print(cap.filteredData(4)); Serial.print('\t');
-        SerialUSB.print(cap.filteredData(5)); Serial.print('\t');
-      }
-    // Faboratory Board
-    else { temp_sensor = read_faboratory_board(sensor_addresses[sensor]); }
-    //Serial.print(temp_sensor); Serial.print('\t');
-//    if (temp_sensor > 1) {
-      //Serial.print(temp_sensor); Serial.print('\t');
-//        Serial.print(cap.filteredData(0)); Serial.print('\t');
-//        Serial.print(cap.filteredData(4)); Serial.print('\t');
-//        Serial.print(cap.filteredData(5)); Serial.print('\t');
-//        Serial.print(cap.filteredData(6)); Serial.print('\t');
-//      }
-  }
+   //for (int sensor = 0; sensor < NUM_SENSORS; sensor++) {
+  //}
+  //SerialUSB.print(cap.filteredData(0)); Serial.print('\t');
+  //SerialUSB.print(cap.filteredData(1)); Serial.print('\t');
+  //SerialUSB.print(cap.filteredData(2)); Serial.print('\t');
+  //SerialUSB.print(cap.filteredData(3)); Serial.print('\t');
+  //SerialUSB.print(cap.filteredData(4)); Serial.print('\t');
+  //SerialUSB.print(cap.filteredData(5)); Serial.print('\t');
 
   //set central device variable
   BLEDevice central = BLE.central();
@@ -146,20 +127,25 @@ void loop() {
     SerialUSB.println(central.address());
     //if we actually have a connection, send the data recieved from the sensors
     if(central.connected()){
-      float_1.writeValue(cap.filteredData(0));
-      float_2.writeValue(cap.filteredData(1));
-      float_3.writeValue(cap.filteredData(2));
-      float_4.writeValue(cap.filteredData(3));
-      float_5.writeValue(cap.filteredData(4));
-      float_6.writeValue(cap.filteredData(5));
+      int_1.writeValue(cap.filteredData(0));
+      SerialUSB.print(cap.filteredData(0)); Serial.print('\t');
+      int_2.writeValue(cap.filteredData(1));
+      SerialUSB.print(cap.filteredData(1)); Serial.print('\t');
+      int_3.writeValue(cap.filteredData(2));
+      SerialUSB.print(cap.filteredData(2)); Serial.print('\t');
+      int_4.writeValue(cap.filteredData(3));
+      SerialUSB.print(cap.filteredData(3)); Serial.print('\t');
+      int_5.writeValue(cap.filteredData(4));
+      SerialUSB.print(cap.filteredData(4)); Serial.print('\t');
+      int_6.writeValue(cap.filteredData(5));
+      SerialUSB.print(cap.filteredData(5)); Serial.print('\t');
     }else{//if we are disconnected from the device, we print out such.
       SerialUSB.print("Disconnected from Device: ");
       SerialUSB.println(central.address());
     }
   }
-  SerialUSB.println("Starting Finish Cycle");
   // 4.4 Delay so that we have the proper sample rate (samples/second), as defined by 
-  finishCycle(); // Print over serial
+  //finishCycle(); // Print over serial
 }
 
 // ***** 5. Helper Functions *****
@@ -171,12 +157,3 @@ void finishCycle() {
   current_time = millis() - initial_time; // Store current millis for future
   SerialUSB.print("\n");
 }
-
-
-float read_faboratory_board(int in_address) {
-  // Read the capacitive sensor
-  Wire.requestFrom(in_address, 2); byte b1_local = Wire.read(); byte b2_local = Wire.read();
-  float sensor_reading = (float)b1_local * 256 + (float)b2_local; // Convert into 16-bit timer value
-  return sensor_reading;
-}
-
