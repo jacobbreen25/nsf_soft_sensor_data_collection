@@ -1,12 +1,33 @@
 #include <iostream>
 
 
-#include "simpleble/SimpleBLE.h"
+#include <simpleble/Adapter.h>
+#include <simpleble/Peripheral.h>
+#include <simpleble/Service.h>
+#include <simpleble/Characteristic.h>
+#include <simpleble/Descriptor.h>
 
 
 int main(int argc, char* argv[]) {
-    SimpleBLE::Adapter adpt;
-    adpt.bluetooth_enabled();
+     if (!SimpleBLE::Adapter::bluetooth_enabled()) {
+      std::cout << "Bluetooth is not enabled" << std::endl;
+      return 1;
+   }
+
+   auto adapters = SimpleBLE::Adapter::get_adapters();
+   if (adapters.empty()) {
+      std::cout << "No Bluetooth adapters found" << std::endl;
+      return 1;
+   }
+
+   // Use the first adapter
+   auto adapter = adapters[0];
+
+   // Do something with the adapter
+   std::cout << "Adapter identifier: " << adapter.identifier() << std::endl;
+   std::cout << "Adapter address: " << adapter.address() << std::endl;
+
+   return 0;
 /*  if (!SimpleBLE::Adapter::bluetooth_enabled()) {
       std::cout << "Bluetooth is not enabled" << std::endl;
       return 1;
