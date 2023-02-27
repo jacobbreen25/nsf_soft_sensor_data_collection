@@ -6,6 +6,8 @@ from tkinter.filedialog import askdirectory
 import bluetooth as BLE
 from datetime import datetime
 from queue import Queue
+import usb.core
+import usb.util
 import serial.tools.list_ports
 
 #automatically create the filename for if the use would like to keep it as is
@@ -42,10 +44,46 @@ vert.pack(side=RIGHT, fill=Y)
 term = Text(t_frame, state=DISABLED, background="light gray", width = int(width/16), height= int(height/35), wrap=NONE, undo=True, xscrollcommand=hor.set, yscrollcommand=vert.set)
 
 com_options = []
-for p in serial.tools.list_ports.comports():
-        com_options.append(p.description) 
+com_names = []
+com_dev = usb.core.find(find_all=True)
+if com_dev is None:
+        print('No Devices Found')
+        raise ValueError('Device not found')
+for d in com_dev:
+        d.set_configuration()
+        if(d.port_number == 7):
+                cfg = d.get_active_configuration()
+                intf = cfg[(0,0)]
+                ep = usb.util.find_descriptor(
+                custom_match = \
+                lambda e: \
+                usb.utli.endpoint_direction(e.bEndpointAddress) == \
+                usb.util.ENDPOINT_OUT)
+                assert ep is not None
+                ep.write('1')
+        # try:
+        #         d.set_configuration()
+        # except usb.core.USBError as usb_error:
+        #         print(usb_error)
+        #cfg = d.get_active_configuration()
+        #intf = cfg[(0,0)]
+
+        #ep = usb.utli.find_descriptor(intf, custom_match =  
+        #                                    lambda e: \
+        #                                    usb.util.endpoint_direction(e.dEndpointAddress) == \
+        #                                    usb.util.ENDPOINT_OUT)
+        #d.write(1, bytearray(1))
+        #print(d.manufacturer)
+        com_options.append(d)
+        com_names.append("COM-"+ str(d.port_number)+ " (" + str(d.iManufacturer) + ")")
 com_choice = StringVar()
-com_choice.set(com_options[0])
+com_choice.set(com_names[0])
+
+# com_options = []
+# for p in serial.tools.list_ports.comports():
+#         com_options.append(p.description) 
+# com_choice = StringVar()
+# com_choice.set(com_options[0])
 
 queue = Queue(maxsize=1)
 bluetooth_obj = BLE.bluetooth(queue, term, connect_button, begin_button)
@@ -102,7 +140,7 @@ mocap_box = Checkbutton(app, text="Are you Syncing with MOCAP?", variable=tk_moc
 #    begin_button['state'] = tk.DISABLED
 
 com_text = Label(app, text="Select COM Port for Mocap (Ignore if not needed):", font="Arial 11 bold")
-com_drop = ttk.OptionMenu(app, com_choice, *com_options)
+com_drop = ttk.OptionMenu(app, com_choice, *com_names)
 
 
 info_text = Label(app, text="This Application is to be used in the NSF Soft Sensor Project run by UMass Lowell.", font="Arial 11 bold")

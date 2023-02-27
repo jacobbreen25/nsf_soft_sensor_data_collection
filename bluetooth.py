@@ -283,7 +283,7 @@ class bluetooth:
     Author: Jacob Breen
     """
     def mocap_start(self, serial_obj):
-        mocap = serial.Serial(serial_obj.name)
+        mocap = serial.Serial(serial_obj.name, baudrate=300)
         mocap.open()
         mocap.write(1)
         time.sleep(3)
