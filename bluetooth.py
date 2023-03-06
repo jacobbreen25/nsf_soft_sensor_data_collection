@@ -92,6 +92,7 @@ class bluetooth:
         list.append(state)
         oFileWriter.writerow(list)
         oFile.flush() 
+    
     """
     Name: __connectBLE
     Params: self, name (of type string)
@@ -155,6 +156,7 @@ class bluetooth:
                     self.terminal.insert(END, "\" when collecting data\n")
                     self.terminal['state'] = tk.DISABLED
                     self.queue.put(0)
+                    return
                 self.queue.get()
                 self.outfile.close()
                 self.terminal['state'] = tk.NORMAL
@@ -174,7 +176,6 @@ class bluetooth:
     """    
     def dataRetrieve(self, filename : str):
         t = asyncio.run(self.__retrieve__(filename))
-
 
     """
     Name: switchButtonState
@@ -249,6 +250,12 @@ class bluetooth:
             self.terminal['state'] = tk.DISABLED
             return
         if self.begin_button['text'] == "Begin Testing":
+            if name.find('/') == -1:
+                self.terminal['state'] = tk.NORMAL
+                self.terminal.insert(END, "\nPlease Insert File Path\n")
+                self.terminal.see(END)
+                self.terminal['state'] = tk.DISABLED
+                return
             t = threading.Thread(target= self.dataRetrieve, args=[name])
             t.start()
             if(bool.get() == 1):
@@ -288,6 +295,8 @@ class bluetooth:
     def mocap_start(self, serial_obj):
         port_name = serial_obj.get()
         port_name  = port_name[:port_name.find('-') - 1]
+        if port_name == '':
+            return
         mocap = serial.Serial(port=port_name, baudrate=300)
         mocap.write(1)
         mocap.close()
