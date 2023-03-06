@@ -14,7 +14,9 @@ import csv
 import queue as queue
 import time
 import serial
-    
+
+state = 0
+
 class bluetooth:  
     """
      Name: __init__
@@ -23,9 +25,8 @@ class bluetooth:
      Date Last Changed: 11/18/22
      Author: Jacob Breen
     """
-    def __init__(self, q, term, connect, begin):
+    def __init__(self, q : queue, term, connect, begin):
         self.client = 0
-
         self.arduino_ble = backends.device.BLEDevice(0)
 
         #self.Thread = threading.Thread(target= self.dataRetrieve())
@@ -50,7 +51,7 @@ class bluetooth:
     Date Last Changed: 11/18/22
     Author: Jacob Breen
     """
-    def __callback(self, characteristic, d):
+    def __callback(self, characteristic, d : bytearray):
         data_array = d.decode().rstrip().split('\t')
         #threading.Thread(self.__print__(data_array))
         threading.Thread(self.__write_to_file__(self.outfileWritable, self.outfile, data_array)).start() 
@@ -63,18 +64,19 @@ class bluetooth:
     Date Last Changed: 11/18/22
     Author: Jacob Breen
     """
-    def __print__(self,list):
+    def __print__(self, list : list):
         self.terminal['state'] = tk.NORMAL
         self.terminal.delete('end -1 l','end')
-        self.terminal.insert('end -2 chars', str(list[0]) +': '+'\t')
-        self.terminal.insert('end -2 chars', str(list[1]) +'\t')
-        self.terminal.insert('end -2 chars', str(list[2])+'\t')
-        self.terminal.insert('end -2 chars', str(list[3])+'\t')
-        self.terminal.insert('end -2 chars', str(list[4])+'\t')
-        self.terminal.insert('end -2 chars', str(list[5])+'\t')
-        self.terminal.insert('end -2 chars', str(list[6])+'\t')
-        self.terminal.insert('end -2 chars', str(list[7])+'\t')
-        self.terminal.insert('end -2 chars', str(list[8]))
+        self.terminal.insert('end', str(list[0]) +': '+'\t')
+        self.terminal.insert('end', str(list[1]) +'\t')
+        self.terminal.insert('end', str(list[2])+'\t')
+        self.terminal.insert('end', str(list[3])+'\t')
+        self.terminal.insert('end', str(list[4])+'\t')
+        self.terminal.insert('end', str(list[5])+'\t')
+        self.terminal.insert('end', str(list[6])+'\t')
+        self.terminal.insert('end', str(list[7])+'\t')
+        self.terminal.insert('end', str(list[8]) + '\t')
+        self.terminal.insert('end', str(state))
         self.terminal.see(END)
         self.terminal['state'] = tk.DISABLED
 
@@ -85,8 +87,9 @@ class bluetooth:
     Date Last Changed: 11/18/22
     Author: Jacob Breen
     """
-    def __write_to_file__(self,oFileWriter,oFile,list):
+    def __write_to_file__(self, oFileWriter, oFile, list : list):
         list[0] = float(list[0])/1000
+        list.append(state)
         oFileWriter.writerow(list)
         oFile.flush() 
     """
@@ -96,7 +99,7 @@ class bluetooth:
     Date Last Changed: 11/18/22
     Author: Jacob Breen
     """
-    async def __connectBLE(self, name):
+    async def __connectBLE(self, name : str):
         devices = await BleakScanner.discover()
         for d in devices:
             if d.name == name:
@@ -111,7 +114,7 @@ class bluetooth:
     Author: Jacob Breen
     """
 
-    async def __retrieve__(self, filename):
+    async def __retrieve__(self, filename : str):
         with open(filename + ".csv", 'w+',newline='') as self.outfile:
             self.outfileWritable = csv.writer(self.outfile)
             self.terminal['state'] = tk.NORMAL
@@ -169,7 +172,7 @@ class bluetooth:
     Date Last Changed: 1/26/23
     Author: Jacob Breen
     """    
-    def dataRetrieve(self, filename):
+    def dataRetrieve(self, filename : str):
         t = asyncio.run(self.__retrieve__(filename))
 
 
@@ -193,7 +196,7 @@ class bluetooth:
     Date Last Changed: 11/18/22
     Author: Jacob Breen
     """
-    def connectBluetooth(self, name):
+    def connectBluetooth(self, name : str):
         if name != "NULL":
             t = threading.Thread(target=self.connect, args=[name])
         if self.conn_button['text'] == "Connect Bluetooth":
@@ -239,17 +242,17 @@ class bluetooth:
     Date Last Changed: 1/26/23
     Author: Jacob Breen
     """    
-    def bluetoothRetData(self, name, bool, serial_obj):
+    def bluetoothRetData(self, name : str, bool : bool, serial_obj):
         if self.arduino_ble.address == 0: 
             self.terminal['state'] = tk.NORMAL
             self.terminal.insert(END, "No Arduino Found")
             self.terminal['state'] = tk.DISABLED
             return
         if self.begin_button['text'] == "Begin Testing":
-            if(bool.get == 1):
-                threading.Thread(target=self.mocap_start, args=[serial_obj]).start()
             t = threading.Thread(target= self.dataRetrieve, args=[name])
             t.start()
+            if(bool.get() == 1):
+                threading.Thread(target=self.mocap_start, args=[serial_obj]).start()
             def wait_for_end():
                 while(t.is_alive()):
                     if not self.queue.empty():
@@ -272,7 +275,7 @@ class bluetooth:
     Date Last Changed: 1/26/23
     Author: Jacob Breen
     """
-    def connect(self, iName):
+    def connect(self, iName : str):
         asyncio.run(self.__connectBLE(name=iName))
 
     """
@@ -283,12 +286,19 @@ class bluetooth:
     Author: Jacob Breen
     """
     def mocap_start(self, serial_obj):
-        mocap = serial.Serial(serial_obj.name)
-        mocap.open()
+        port_name = serial_obj.get()
+        port_name  = port_name[:port_name.find('-') - 1]
+        mocap = serial.Serial(port=port_name, baudrate=300)
         mocap.write(1)
-        time.sleep(3)
-        mocap.write(0)
-        mocap.reset_output_buffer()
         mocap.close()
-
+    """
+    Name: change_state
+    Params: self, chng_state
+    Description: changes the state of the user by taking in a value 
+    Date Last Changed: 1/26/23
+    Author: Jacob Breen
+    """
+    def change_state(self, chng_state : int):
+        global state
+        state = chng_state
 

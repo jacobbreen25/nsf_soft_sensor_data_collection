@@ -16,7 +16,9 @@ app = tk.Tk()
 app.title("NSF Soft Sensor Data Collection")
 #app.iconphoto()
 app.resizable()
- 
+icon = PhotoImage(file="uml-logo.png")
+app.iconphoto(False, icon)
+
 width = app.winfo_screenwidth()
 height = app.winfo_screenwidth()
 
@@ -41,15 +43,9 @@ vert = Scrollbar(t_frame)
 vert.pack(side=RIGHT, fill=Y)
 term = Text(t_frame, state=DISABLED, background="light gray", width = int(width/16), height= int(height/35), wrap=NONE, undo=True, xscrollcommand=hor.set, yscrollcommand=vert.set)
 
-com_options = []
-for p in serial.tools.list_ports.comports():
-        com_options.append(p.description) 
-com_choice = StringVar()
-com_choice.set(com_options[0])
-
 queue = Queue(maxsize=1)
-bluetooth_obj = BLE.bluetooth(queue, term, connect_button, begin_button)
 
+bluetooth_obj = BLE.bluetooth(queue, term, connect_button, begin_button)
 
 #create entry and label for filename
 
@@ -62,7 +58,10 @@ filepath_button = tk.Button(app, text="Please choose file path", command= lambda
 def filePathQuery():
         temp_name = askdirectory(title='Please enter a file path')
         temp_name = temp_name[2:]
-        path_button_text.set(temp_name + "/")
+        if(temp_name == None):
+                path_button_text.set(temp_name)
+        else:
+                path_button_text.set(temp_name + "/")
         term['state'] = tk.NORMAL
         term.insert(END, "Path Changed To: "+ path_button_text.get() + "\n")
         term.see(END)
@@ -72,8 +71,6 @@ def filePathQuery():
 header_label = Label(app, text="To Begin Collecting Data, Please enter the following information", font=("Arial 18 bold"))
 filename_entry.delete(0,"end")
 filename_entry.insert(0, str(path_button_text.get() + 'qtpy_mocap' + datetime.now().strftime("%m_%d_%Y-%H_%M")))
-#header_label.pack()
-#filename = ['arduino','mocap', datetime.now().strftime("%m_%d_%Y-%H_%M")]
 
 #Changes the file name when the checkbox for mocap is changed
 def mocap_entry(): 
@@ -97,16 +94,29 @@ def mocap_entry():
 #Create the checkbox
 mocap_box = Checkbutton(app, text="Are you Syncing with MOCAP?", variable=tk_mocap_bool, onvalue=1, offvalue=0, command= lambda : mocap_entry())
 
-#if bluetooth_obj.arduino_ble.address == 0:
-#    connect_button['text'] = "Connect Bluetooth"
-#    begin_button['state'] = tk.DISABLED
+com_options = []
+com_choice = StringVar(app)
 
 com_text = Label(app, text="Select COM Port for Mocap (Ignore if not needed):", font="Arial 11 bold")
 com_drop = ttk.OptionMenu(app, com_choice, *com_options)
 
+def com_list():
+        com_choice.set('')
+        com_drop.set_menu(None)
+        for p in serial.tools.list_ports.comports():
+                com_options.append(p)
+        for option in com_options:
+                com_drop['menu'].add_command(label=option, command=tk._setit(com_choice, option))
+com_list()
+
+tags_label = Label(app, text="Data Collection Labels", font=("Arial 12 bold"))
+walking_button = tk.Button(app, text="Walking", command= lambda : bluetooth_obj.change_state(1))
+jogging_button = tk.Button(app, text="Jogging", command= lambda : bluetooth_obj.change_state(2))
+sitting_button = tk.Button(app, text="Sitting", command= lambda : bluetooth_obj.change_state(3))
+standing_button = tk.Button(app, text="Standing", command= lambda : bluetooth_obj.change_state(4))
+idle_button = tk.Button(app, text="Idle", command= lambda : bluetooth_obj.change_state(0))
 
 info_text = Label(app, text="This Application is to be used in the NSF Soft Sensor Project run by UMass Lowell.", font="Arial 11 bold")
-
 filepath_label.place(relx=0.01, rely=0.1, anchor='nw')
 filepath_button.place(relx=0.15, rely=0.1, anchor='nw')
 info_text.place(relx=0.0, rely= 0.90)
@@ -116,6 +126,14 @@ filename_entry.place(relx=0.12, rely=0.15, anchor='nw')
 mocap_box.place(relx=0.01, rely=0.05, anchor='nw')
 connect_button.place(relx=0.18, rely=0.20, anchor='nw')
 begin_button.place(relx=0.188, rely=0.25, anchor='nw')
+
+tags_label.place(relx=0.17, rely=0.35, anchor='nw')
+walking_button.place(relx=0.1, rely=0.38, anchor='nw')
+jogging_button.place(relx=0.15, rely=0.38, anchor='nw')
+sitting_button.place(relx=0.2, rely=0.38, anchor='nw')
+standing_button.place(relx=0.25, rely=0.38, anchor='nw')
+idle_button.place(relx=0.30, rely=0.38, anchor='nw')
+
 com_drop.place(relx=0.23, rely=0.30, anchor='nw')
 com_text.place(relx=0.01, rely=0.305, anchor='nw')
 
@@ -125,5 +143,6 @@ vert.config(command=term.yview)
 t_frame.place(relx=0.45, rely=0.05, anchor='nw')
 
 #filename_entry.bind("<FocusIn>", applib.erase_text(filename_entry))
+#app.after(5000, com_list)
 app.mainloop()
 s = Scrollbar()
