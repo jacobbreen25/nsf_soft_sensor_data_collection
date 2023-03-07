@@ -51,7 +51,7 @@ The program automatically adds a timestamp to the name of each .csv file to allo
 
 ### Contributors
 
-Janelle Clark
-Jacob Breen
-Jacob Lorusso
+Janelle Clark,
+Jacob Breen,
+Jacob Lorusso,
 Emily LaBelle
