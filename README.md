@@ -49,7 +49,7 @@ Important Notes:
 The program automatically adds a timestamp to the name of each .csv file to allow for continuous collection without rewriting of data.
 
 
-## Contributors
+### Contributors
 
 Janelle Clark
 Jacob Breen
