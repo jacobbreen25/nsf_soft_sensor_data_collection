@@ -2,6 +2,7 @@
 
 ## Installation
 Firstly, Download the “NSF Soft Sensor Wizard”, run the application, and follow the download instructions.
+
 ![Install Wizard](https://user-images.githubusercontent.com/91704735/223492719-3708a12a-7776-49c9-8c02-6149e26e21e8.PNG)
 
 ## Usage
