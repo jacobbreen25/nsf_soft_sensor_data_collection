@@ -161,10 +161,8 @@ class bluetooth:
                 self.outfile.close()
                 self.terminal['state'] = tk.NORMAL
                 self.terminal.insert(END, "\nEnding Data Collection...\n")
+                self.terminal.insert(END,"Disconnecting From QT Py...\n\n")
                 self.terminal.see(END)
-                self.terminal['state'] = tk.DISABLED
-                self.terminal['state'] = tk.NORMAL
-                self.terminal.insert(END,"Disconnecting From QT Py...\n")
                 self.terminal['state'] = tk.DISABLED
 
     """

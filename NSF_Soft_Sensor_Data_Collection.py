@@ -34,7 +34,7 @@ tk_mocap_bool.set(1)
 
 connect_button = tk.Button(app, text="Connect Bluetooth", command= lambda : bluetooth_obj.connectBluetooth(name="FlexibleSensorBLE"))
 
-begin_button = tk.Button(app, text="Begin Testing",state=tk.DISABLED, command= lambda : bluetooth_obj.bluetoothRetData(name=path_button_text.get() + filename_entry.get(), bool=tk_mocap_bool, serial_obj=com_choice))
+begin_button = tk.Button(app, text="Begin Testing",state=tk.DISABLED, command= lambda : bluetooth_obj.bluetoothRetData(name=path_button_text.get() + filename_entry.get() + datetime.now().strftime("%m_%d_%Y-%H_%M"), bool=tk_mocap_bool, serial_obj=com_choice))
 
 t_frame = Frame(app)
 hor = Scrollbar(t_frame, orient="horizontal")
@@ -50,8 +50,10 @@ bluetooth_obj = BLE.bluetooth(queue, term, connect_button, begin_button)
 #create entry and label for filename
 
 filename_label = Label(app, text="File Name of Saved Data:", font=("Arial 12 bold"))
-filename_entry = Entry(app, width= 50, text= str(path_button_text.get() + 'qtpy_mocap' + datetime.now().strftime("%m_%d_%Y-%H_%M")))
-   
+filename_entry = Entry(app, width= 50)
+filename_entry.delete(0,"end")
+filename_entry.insert(0, str('qtpy_mocap'))
+
 filepath_label = Label(app, text="Please enter a file path:", font=("Arial 12 bold"))
 filepath_button = tk.Button(app, text="Please choose file path", command= lambda : filePathQuery())
 
@@ -69,14 +71,11 @@ def filePathQuery():
 
 #Create the text at the top and put in to the left
 header_label = Label(app, text="To Begin Collecting Data, Please enter the following information", font=("Arial 18 bold"))
-filename_entry.delete(0,"end")
-filename_entry.insert(0, str(path_button_text.get() + 'qtpy_mocap' + datetime.now().strftime("%m_%d_%Y-%H_%M")))
-
 #Changes the file name when the checkbox for mocap is changed
 def mocap_entry(): 
         if tk_mocap_bool.get() == 1:
                 filename_entry.delete(0,"end")
-                filename_entry.insert(0, str('qtpy_mocap' + datetime.now().strftime("%m_%d_%Y-%H_%M")))
+                filename_entry.insert(0, str('qtpy_mocap'))
                 term['state'] = tk.NORMAL
                 term.insert(END,"MOCAP Enabled\n")
                 term.insert(END, "Name Changed To: " + filename_entry.get()+"\n")
@@ -84,7 +83,7 @@ def mocap_entry():
                 term['state'] = tk.DISABLED
         else:
                 filename_entry.delete(0,"end")
-                filename_entry.insert(0, str('qtpy' + datetime.now().strftime("%m_%d_%Y-%H_%M")))
+                filename_entry.insert(0, str('qtpy'))
                 term['state'] = tk.NORMAL
                 term.insert(END,"MOCAP Disabled\n")
                 term.insert(END, "Name Changed To: " + filename_entry.get()+"\n")
@@ -110,11 +109,11 @@ def com_list():
 com_list()
 
 tags_label = Label(app, text="Data Collection Labels", font=("Arial 12 bold"))
-walking_button = tk.Button(app, text="Walking", command= lambda : bluetooth_obj.change_state(1))
-jogging_button = tk.Button(app, text="Jogging", command= lambda : bluetooth_obj.change_state(2))
-sitting_button = tk.Button(app, text="Sitting", command= lambda : bluetooth_obj.change_state(3))
-standing_button = tk.Button(app, text="Standing", command= lambda : bluetooth_obj.change_state(4))
-idle_button = tk.Button(app, text="Idle", command= lambda : bluetooth_obj.change_state(0))
+walking_button = tk.Button(app, text="Walking (1)", command= lambda : bluetooth_obj.change_state(1))
+jogging_button = tk.Button(app, text="Jogging (2)", command= lambda : bluetooth_obj.change_state(2))
+sitting_button = tk.Button(app, text="Sitting (3)", command= lambda : bluetooth_obj.change_state(3))
+standing_button = tk.Button(app, text="Standing (4)", command= lambda : bluetooth_obj.change_state(4))
+idle_button = tk.Button(app, text="Idle (0)", command= lambda : bluetooth_obj.change_state(0))
 
 info_text = Label(app, text="This Application is to be used in the NSF Soft Sensor Project run by UMass Lowell.", font="Arial 11 bold")
 filepath_label.place(relx=0.01, rely=0.1, anchor='nw')
