@@ -19,7 +19,7 @@ Next, choose where you would like to keep the .csv file created when collecting.
 
 ![File Path](https://user-images.githubusercontent.com/91704735/223493035-d420b2f0-04ff-4a75-b326-51151f299048.PNG)
 
-Choose a name for the .csv file. The Program will automatically set a name for the file, depending on the time and if mocap is enabled. 
+Choose a name for the .csv file. The Program will automatically set a name for the file, depending on the time and if mocap is enabled. You will also see a "Set Sample Rate" drop down menue which allows you to choose what sample rate you will be testing at.
 
 ![File Name](https://user-images.githubusercontent.com/91704735/223493127-efa2bf05-6e5a-478b-9110-96cab65a19be.PNG)
 
