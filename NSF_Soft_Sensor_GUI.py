@@ -259,7 +259,7 @@ class NSF_Gui(tk.Tk):
                         await self.bleClient.start_notify(self.dataChar, callback= self.callback)
                         await asyncio.sleep(0.02)
                         while self.endTesting.empty():
-                            #self.update()
+                            self.update()
                             await asyncio.sleep(0.1)
                             await asyncio.sleep(0)
                         await self.bleClient.stop_notify(self.dataChar)
@@ -320,9 +320,9 @@ class NSF_Gui(tk.Tk):
     async def clockDaemon(self):
         while(True):
             self.can_take = False
-            await asyncio.sleep(1/self.samplerate)
+            await asyncio.sleep(0.01/self.samplerate - 0.001)
             self.can_take = True
-            await asyncio.sleep(0)
+            await asyncio.sleep(0.001)
 
 if __name__ == "__main__":
     async def asyncio_main():
