@@ -58,7 +58,7 @@ To use the QT Py's using Arduino, you will have to download the needed libraries
 5. Go to Tools
 6. Go To Board
 7. Go to Board Manager
-8. look up esp32 in the search bar and download "esp32 by Espressif"
+8. Use the search bar to look up esp32 in the search bar and download "esp32 by Espressif"
 
 You will also have to download the ArduinoBLE library like so:
 1. Open Arduino and Open the Tools drop down
