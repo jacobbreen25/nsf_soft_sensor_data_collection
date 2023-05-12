@@ -47,6 +47,24 @@ Important Notes:
 
 The program automatically adds a timestamp to the name of each .csv file to allow for continuous collection without rewriting of data.
 
+## Arduino Installation
+
+To use the QT Py's using Arduino, you will have to download the needed libraries for ESP-32 devices like so:
+
+1. Open Arduino and open the File drop down
+2. Got to Preferences
+3. Add the following link ot the "Additional boards manager URLs" box at the bottom on the Preferences menu: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json,https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+4. Select ok
+5. Go to Tools
+6. Go To Board
+7. Go to Board Manager
+8. look up esp32 in the search bar and download "esp32 by Espressif"
+
+You will also have to download the ArduinoBLE library like so:
+1. Open Arduino and Open the Tools drop down
+2. Open Manage Libraries
+3. Use the search bar to look up "ArduinoBLE by Arduino" and select the install button
+
 
 ### Contributors
 
