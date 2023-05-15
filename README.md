@@ -18,7 +18,7 @@ Choose a name for the .csv file. The Program will automatically set a name for t
 
 Once open, use the checkbox labeled “Check for Smart MOCAP Enabling” to specify if you are syncing with a MOCAP system. If you are using Smart MOCAP, choose which COM port you are using.
 
-![File Name   File Path](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/7d1a417d-6fba-411c-a621-170e3c7d33f9)
+![COM Port](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/5c8839d1-6d39-488e-8597-446dc533535b)
 
 Use the “Connect Bluetooth” button to automatically find the bluetooth device. Once the bluetooth device is found, the terminal will say so and the “Begin Testing” button will become unshaded and the “Connect Bluetooth” will say “Disconnect Bluetooth”
 
