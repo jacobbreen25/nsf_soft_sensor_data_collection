@@ -6,29 +6,24 @@ Firstly, Download the “NSF Soft Sensor Wizard”, run the application, and fol
 ![Install Wizard](https://user-images.githubusercontent.com/91704735/229606666-1a73bde9-ed8f-473c-a515-7631109a012f.PNG) 
 
 ## Usage
-To use the app, firstly run the “NSF Soft Sensor Application” application. 
+To use the app, firstly run the “NSF Soft Sensor Application” application
 
-![Fullscreen App](https://user-images.githubusercontent.com/91704735/229606085-1ba6714d-7f96-4025-b6ef-6292c55bfb0c.PNG)
-
-Once open, use the checkbox labeled “Are you syncing with MOCAP?” to specify if you are syncing with a MOCAP system. 
-
-![MOCAP Checkbox](https://user-images.githubusercontent.com/91704735/223492961-399da026-9095-4a5b-8d9b-5b9fae6050f7.PNG)
+![Fullscreen App](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/ac2e1287-854b-4136-aa3d-f0d12d549f21)
 
 Next, choose where you would like to keep the .csv file created when collecting. Note: If you do not choose a file path, you will not be able to run the program.
 
-![File Path](https://user-images.githubusercontent.com/91704735/223493035-d420b2f0-04ff-4a75-b326-51151f299048.PNG)
-
 Choose a name for the .csv file. The Program will automatically set a name for the file, depending on the time and if mocap is enabled. You will also see a "Set Sample Rate" drop down menu which allows you to choose what sample rate you will be testing at.
 
-![File Name   Sample Rate](https://user-images.githubusercontent.com/91704735/229606170-f4cfa128-683e-46f4-a748-0aacf1fcc169.PNG)
+![File Name   File Path](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/0be86d5e-f055-4603-a627-ff5536775653)
+
+Once open, use the checkbox labeled “Check for Smart MOCAP Enabling” to specify if you are syncing with a MOCAP system. If you are using Smart MOCAP, choose which COM port you are using.
+
+![File Name   File Path](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/7d1a417d-6fba-411c-a621-170e3c7d33f9)
 
 Use the “Connect Bluetooth” button to automatically find the bluetooth device. Once the bluetooth device is found, the terminal will say so and the “Begin Testing” button will become unshaded and the “Connect Bluetooth” will say “Disconnect Bluetooth”
 
+
 ![Connect Button](https://user-images.githubusercontent.com/91704735/229606210-99ba61b7-af5f-4b25-8431-d4fa4a8f74a2.PNG)
-
-Finally, if you are using MOCAP, choose the COM port the MOCAP is connected to. If none is chosen, it is essentially unchecking the MOCAP check box.
-
-![COM Port](https://user-images.githubusercontent.com/91704735/229606257-c5bf0ffe-74ae-41f0-bc5d-b0b6dd78b492.PNG)
 
 When ready to begin collecting data, press “Begin Testing”. You will see the terminal clear and show current data coming in, including local time to the QT Py, all sensors, including those that are not connected, and a final “Task” number. 
 
