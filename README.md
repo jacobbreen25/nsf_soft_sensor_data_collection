@@ -22,21 +22,21 @@ Once open, use the checkbox labeled “Check for Smart MOCAP Enabling” to spec
 
 Use the “Connect Bluetooth” button to automatically find the bluetooth device. Once the bluetooth device is found, the terminal will say so and the “Begin Testing” button will become unshaded and the “Connect Bluetooth” will say “Disconnect Bluetooth”
 
-
-![Connect Button](https://user-images.githubusercontent.com/91704735/229606210-99ba61b7-af5f-4b25-8431-d4fa4a8f74a2.PNG)
+![Connect+Disconnect Button](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/aa05eb93-df9b-4f9d-bea9-065e1d2934be)
 
 When ready to begin collecting data, press “Begin Testing”. You will see the terminal clear and show current data coming in, including local time to the QT Py, all sensors, including those that are not connected, and a final “Task” number. 
 
-![Begin Testing](https://user-images.githubusercontent.com/91704735/229605950-5d60c1be-aed7-41e7-97d6-03dd5ab430bf.PNG)
-![Begin Testing 2](https://user-images.githubusercontent.com/91704735/229606036-78cda8a5-54ed-4f63-b1e2-3e1ac4971a91.PNG)
+![Begin Testing](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/ba2442cf-00e9-4d64-a47c-c4ac43af195e)
 
-While collecting, if you would like to change the “Task” of the participant, you can press the Data Collection Label buttons, which you will be able to visually see in the terminal when collecting.
+![Begin Testing 2](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/e7c7da1a-ded8-4663-9193-b4a1e8c2c2ed)
 
-![Data Collection Labels](https://user-images.githubusercontent.com/91704735/229606287-e9537037-84db-4aa8-8f93-294c8c0778ca.PNG)
+While collecting, if you would like to change the “Task” of the participant, you can set how long you would liek to have the task run for and press the Data Collection Label buttons, which you will be able to visually see in the terminal when collecting. It is important that you set the timer first before pressing a task, as if you do not it will immediately go back to idle. When the task finishes, it will automatically go back to idle and flash the terminal red.
+
+![Data Collection Labels](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/1023e441-c6aa-4829-9377-c805aa5e9cac)
 
 Once Finished Collecting, press the “Stop Testing” button which will end the collection.
 
-![Stop Testing](https://user-images.githubusercontent.com/91704735/229606332-9c817163-1585-4dac-a6e5-bfcf4a8643e6.PNG)
+![Stop Testing](https://github.com/jacobbreen25/nsf_soft_sensor_data_collection/assets/91704735/483ea17c-b1a6-4490-95c5-1c796b29e631)
 
 Important Notes:
 
