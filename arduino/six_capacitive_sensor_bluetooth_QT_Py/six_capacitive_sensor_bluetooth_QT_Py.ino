@@ -20,22 +20,12 @@
 
 
 
-// ***** 2. Initialize Variables *****
-// 2.1 Control driver's high-level behavior
-bool use_mpr = true; // **USER** True: read from MPR. False: read from Faboratory circuit
-bool print_verbose = false; // **USER** True: display the time elapsed since starting (in milliseconds). False: don't display time elapsed.
-
 // 2.2. General Variables. No need to modify these.
 bool first = 1;
 
-int avg = 0;
-int avg_count = 0;
-int fin = 710;
-bool led_on = false;
-
 unsigned long initial_time = 0.0; // The time after setup
-unsigned long sample_rate = 200; // How many samples per second. For highest timing accuracy, choose something that divides evenly into 1000
-unsigned long current_time = 0; // The time elapsed since startup until the beginning of the current sample
+unsigned long sample_rate = 120; // How many samples per second. For highest timing accuracy, choose something that divides evenly into 1000
+//unsigned long current_time = 0; // The time elapsed since startup until the beginning of the current sample
 unsigned long time_int = 0;
 unsigned long start_time = 0;
 unsigned long sample_number = 0; // How many samples we have taken since startup
@@ -55,16 +45,17 @@ String time_data;
 BLEService MessageService("eb523250-6513-11ed-9c9d-0800200c9a66"); 
 //create the characteristics that will be used to send the data through bluetooth and initialize tham as Readable and Notifyable
 BLEStringCharacteristic data_char("eb523251-6513-11ed-9c9d-0800200c9a66", BLERead | BLENotify, 51);
+//BLEStringCharacteristic data_char("eb523252-6513-11ed-9c9d-0800200c9a66", BLEWrite | BLERead | BLENotify, 51);
 // ***** 3. Set up Arduino *****
 void setup() {
 // 3.1 Initialize communication lines
   Serial.begin(57600);
 
   pinMode(A1, OUTPUT);
-  pinMode(A0, INPUT);
+  //pinMode(A0, INPUT);
 
-  initial_time = millis(); // Initial time
-  current_time = 0;
+//initial_time = millis(); // Initial time
+  //current_time = 0;
 
   // initialize BLE
   if(!BLE.begin()){
@@ -80,6 +71,7 @@ void setup() {
   //Add the service to the bluetooth.
   BLE.addService(MessageService);
   //Adverts the bluetooth 
+  digitalWrite(A1, HIGH);
   BLE.advertise();
   Serial.println("\nNano is waiting for connections...");
 }
@@ -88,7 +80,6 @@ void setup() {
 void loop() {
   int value;
   //sample_number++; // Increment sample number
-
   //set central device variable
   BLEDevice central = BLE.central();
   //if central is initialized
@@ -97,37 +88,35 @@ void loop() {
     //if we actually have a connection, send the data recieved from the sensors
     if(central.connected()){
       initial_time = millis();
-      Serial.print("Connected to device: ");
-      Serial.println(millis());
+      //Serial.print("Connected to device: ");
+      //Serial.println(millis());
       if(first){
         start_time = millis();
         first = 0;
-        Serial.print("Connected to device: ");
-        Serial.println(central.address());
+        //Serial.print("Connected to device: ");
+        //Serial.println(central.address());
       }
-      
-      data_1 = String(touchRead(A2));
+      /*data_1 = String(touchRead(A2));
       data_2 = String(touchRead(A3));
       data_3 = String(touchRead(SDA));
       data_4 = String(touchRead(SCL));
       data_5 = String(touchRead(TX));
       data_6 = String(touchRead(MOSI));
       data_7 = String(touchRead(MISO));
-      data_8 = String(touchRead(SCK));
-      time_data = String(millis() - start_time);
+      data_8 = String(touchRead(MISO));
+      time_data = String(millis() - start_time);*/
 
-      comp_data = time_data+'\t'+data_1+'\t'+data_2+'\t'+data_3+'\t'+data_4+'\t'+data_5+'\t'+data_6+'\t'+data_7+'\t'+data_8;
-      data_char.writeValue(comp_data);
+      //comp_data = time_data+'\t'+data_1+'\t'+data_2+'\t'+data_3+'\t'+data_4+'\t'+data_5+'\t'+data_6+'\t'+data_7+'\t'+data_8;
+      //comp_data = String(millis() - start_time)+'\t'+String(touchRead(A2))+'\t'+String(touchRead(A3))+'\t'+String(touchRead(SDA))+'\t'+String(touchRead(SCL))+'\t'+String(touchRead(TX))+'\t'+String(touchRead(MOSI))+'\t'+String(touchRead(MISO))+'\t'+String(touchRead(MISO));
+      //data_char.writeValue(String(millis() - start_time)+'\t'+String(touchRead(A2))+'\t'+String(touchRead(A3))+'\t'+String(touchRead(SDA))+'\t'+String(touchRead(SCL))+'\t'+String(touchRead(TX))+'\t'+String(touchRead(MOSI))+'\t'+String(touchRead(MISO))+'\t'+String(touchRead(MISO)));
       finishCycle();
     }else{//if we are disconnected from the device, we print out such.
       first = 1;
       //sample_number = 0;
-      initial_time = 0;
       //Serial.print("Disconnected from Device: ");
       //Serial.println(central.address());
     }
   }
-  digitalWrite(A1, HIGH);
   
   /*if(avg_count < 1000){
     avg += current_volt;
@@ -152,13 +141,16 @@ void loop() {
 void finishCycle() {
   // Delay for 'time_per_sample' [ms], print newline character
   unsigned long comp_time = millis() - initial_time;
-  int time_per_sample = 1000/sample_rate;
-  if(time_per_sample > comp_time){
+  unsigned long time_per_sample = 1000UL/sample_rate;
+  if(comp_time < time_per_sample){
     delay(time_per_sample - comp_time);
     //Serial.println("Waiting")    
   }else{
     Serial.print("ERR: Not Waiting "); Serial.print("time_per_sample = "); Serial.print(time_per_sample); Serial.print("comp_time = "); Serial.println(comp_time);
   }
+  data_char.writeValue(String(millis() - start_time)+'\t'+String(touchRead(A2))+'\t'+String(touchRead(A3))+'\t'+String(touchRead(SDA))+'\t'+String(touchRead(SCL))+'\t'+String(touchRead(TX))+'\t'+String(touchRead(MOSI))+'\t'+String(touchRead(MISO))+'\t'+String(touchRead(MISO)));
+  
+  initial_time = millis();
   //current_time = millis() - initial_time; // Store current millis for future
   //SerialUSB.print("\n");
 }
