@@ -37,7 +37,7 @@ class FlexSense_Gui(tk.Tk):
         self.startTime = float
         self.endTesting = queue.Queue()
         self.bluetooth_command = queue.Queue()
-
+        self.bleClient = None
         self.dataChar = "eb523251-6513-11ed-9c9d-0800200c9a66".format(0xFFE1)
 
         self.isActive = True      
@@ -65,6 +65,8 @@ class FlexSense_Gui(tk.Tk):
         self.title("NSF Soft Sensor Data Collection")
         self.resizable()
         self.tasks = []
+        icon = tk.PhotoImage(file="uml-logo.png")
+        self.iconphoto(False, icon)
 
         f = [tk.Frame(master=self)]
         lHeader = tk.Label(master=f[-1], text="NSF Soft Sensor Data Collection", font=self.title_font)
@@ -434,21 +436,6 @@ class FlexSense_Gui(tk.Tk):
             await asyncio.sleep(0)
 
     """
-    clockDaemon
-
-    Clock for sample rate. Adds delay according to samplerate variable. Changes variable can_take when it is ready to take data.
-    """
-
-    async def clockDaemon(self):
-        while(self.isActive):
-            #self.time = time.time()
-            #self.can_take = False
-            #await asyncio.sleep(1/self.samplerate - 0.0005)
-            #await asyncio.sleep(0.1/240)
-            #self.can_take = True
-            await asyncio.sleep(0)
-
-    """
     timeDaemon
 
     Daemon for the built in timer for labels
@@ -494,12 +481,10 @@ class FlexSense_Gui(tk.Tk):
                         await asyncio.sleep(1)
                         temp = temp - 1
                         hours = int(temp/3600)
-                        minutes = int(temp/60 - hours*3600)
-                        seconds = int(temp - minutes*60)
+                        minutes = int((temp - hours*3600)/60)
+                        seconds = int(temp - minutes*60 - hours*3600)
                         self.spHours.set(hours)
-                        temp = temp
                         self.spMinutes.set(minutes)
-                        temp = (temp % 60) - temp
                         self.spSeconds.set(seconds)
                     
             else:
@@ -516,6 +501,8 @@ class FlexSense_Gui(tk.Tk):
 
     def destroy(self):
         self.isActive = False
+        if(self.bleClient is not None and self.bleClient.is_connected):
+            self.bleClient.disconnect()
         tk.Tk.destroy(self)
 
 if __name__ == "__main__":
