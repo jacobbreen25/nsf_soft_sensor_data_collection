@@ -12,15 +12,19 @@ from bleak import BleakScanner, BleakClient, backends
 import csv
 import queue
 from functools import wraps
+import math
+from ratelimit import limits, sleep_and_retry
 
 glb_command = str
 
 class FlexSense_Gui(tk.Tk):
+    
     """
     __init__
 
     Initializes the object and sets everything up for use
     """
+
     def __init__(self, *args, **kwargs):
         self.experimentName = "qtpy"
         self.experimentPath = ""
@@ -56,6 +60,7 @@ class FlexSense_Gui(tk.Tk):
         s = Slider
         sp = Spinbox
     """
+
     async def construct_gui(self):
         self.title("NSF Soft Sensor Data Collection")
         self.resizable()
@@ -114,6 +119,7 @@ class FlexSense_Gui(tk.Tk):
         self.sHz = tk.Scale(master=f[-1], from_= 60, to_=120, resolution=20, tickinterval=20, length=200, orient="horizontal", command=sliderCommand)
         lHz.pack(side=tk.LEFT, pady=5)
         self.sHz.pack(side=tk.LEFT, pady=5)
+
         f.append(tk.Frame(master=self))
         def connect():
             global glb_command
@@ -191,18 +197,25 @@ class FlexSense_Gui(tk.Tk):
         vert.pack(side=tk.RIGHT, fill=tk.Y)
         self.terminal = tk.Text(f[-1], state=tk.DISABLED, background="light gray", wrap=tk.NONE, undo=True, xscrollcommand=hor.set, yscrollcommand=vert.set)
         self.terminal.pack(side=tk.LEFT, pady=5)
+        hor.config(command=self.terminal.xview)
+        vert.config(command=self.terminal.yview)
         
+        grip = ttk.Sizegrip(self)
+        grip.pack(side="right", anchor="se")
+
         acquireCOMList()
 
         for task in self.tasks:
             await task
         for frame in f:
              frame.pack()
+    
     """
     filePathQuery
 
     Queries the user for what file path they would like
     """
+
     def filePathQuery(self):
         temp_name = askdirectory(title='Please enter a file path')
         temp_name = temp_name[2:]
@@ -210,6 +223,12 @@ class FlexSense_Gui(tk.Tk):
                 self.experimentPath = temp_name
         else:
                 self.experimentPath = (temp_name + "/")
+
+    """
+    mocapChecked
+
+    Event that happens when the MOCAP checkbox is checked 
+    """
 
     def mocapChecked(self):
         if(self.mocapBool.get()):
@@ -224,13 +243,15 @@ class FlexSense_Gui(tk.Tk):
 
     Takes a name and connects to a bluetooth device given that name.
     """
+
     async def connect_bluetooth(self, name : str):
         #self.bleDevice = backends.device.BLEDevice(0)
         #self.bleClient = None
-        self.print("Connection processing...\n")
+        
         self.bBluetooth['state'] = tk.DISABLED
         self.update()
         if(self.bBluetooth['text'] != "Disconnect Bluetooth"):
+            self.print("Connection processing...\n")
             devices = await BleakScanner.discover()
             for d in devices:
                 #self.print(str(d) + "\n")
@@ -248,6 +269,7 @@ class FlexSense_Gui(tk.Tk):
                 else:
                     self.bleClient = None
         else:
+            self.print("Disconnection processing...\n")
             if (self.bleClient.is_connected):  
                 await self.bleClient.disconnect()
                 #self.bBluetooth['text'] = "Connect Bluetooth"
@@ -265,20 +287,31 @@ class FlexSense_Gui(tk.Tk):
 
     A callback ran after every packet is received
     """
+    
     async def callback(self, characteristic, d : bytearray):
-        if (self.can_take):
-            data_array = d.decode().rstrip().split('\t')
+        #if (self.can_take):
+        #print(self.lastPacketTime) - pow(10,9)/60
+        #if((self.lastPacketTime + pow(10,9)/30 >= time.time_ns()) and (self.lastPacketTime + pow(10,9)/120 <= time.time_ns())):
+        #if((self.lastPacketTime + pow(10,9)/120 <= time.time_ns())):
+        #print(self.lastPacketTime)
+        #print("Start Time:" + str(time.time()))
+        data_array = d.decode().rstrip().split('\t')
+        currenttime = int(data_array[0])
+        if (self.lastPacketTime is None or currenttime - self.lastPacketTime >= (1000 - 130)/int(self.samplerate)):
             data_array.append(self.label)
             self.clearln()
             self.print("\n")
             self.print(data_array)
             self.write(data_array)
+            self.lastPacketTime = currenttime
+            #print("Final Time:" + str(time.time()))
 
     """
     capture_bluetooth
 
     Begins capturing data from the bluetooth device connected
-    """    
+    """  
+
     async def capture_bluetooth(self):
         self.bTesting['state'] = tk.DISABLED
         self.sHz['state'] = tk.DISABLED
@@ -301,17 +334,21 @@ class FlexSense_Gui(tk.Tk):
                                 serial = serial.Serial(port=port_name, baudrate=300)
                                 serial.write(1)
                                 serial.close()
+                        self.lastPacketTime = None
                         await self.bleClient.start_notify(self.dataChar, callback= self.callback)
-                        await asyncio.sleep(0.02)
+                        await asyncio.sleep(0)
                         while self.endTesting.empty():
                             self.update()
-                            await asyncio.sleep(0.1)
                             await asyncio.sleep(0)
                         await self.bleClient.stop_notify(self.dataChar)
+                        await asyncio.sleep(0)
                     except Exception as e:
+                        await asyncio.sleep(0)
+                        self.outfile.close()
                         self.print(str(e) + "\n")
                     self.print("\n")
                     self.endTesting.get()
+                    await asyncio.sleep(0)
                     self.outfile.close()
             else:
                 self.sHz['state'] = tk.NORMAL
@@ -331,6 +368,7 @@ class FlexSense_Gui(tk.Tk):
 
     Runs after device disconnects and puts app into disconnected state
     """
+
     def disconnect_callback(self, client):
         self.bBluetooth['text'] = "Connect Bluetooth"
         self.bBluetooth['state'] = tk.NORMAL
@@ -338,39 +376,48 @@ class FlexSense_Gui(tk.Tk):
         self.bTesting['state'] = tk.DISABLED
         self.print("Disconnected from device\n")
         return
+    
     """
     clearln
 
     Clears the line on the terminal
     """
+
     def clearln(self):
         self.terminal['state'] = tk.NORMAL
         #self.terminal.replace()
         self.terminal.delete("end-1l", tk.END)
         self.terminal['state'] = tk.DISABLED
+    
     """
     print 
 
     Prints whatever is given as printable at the given index
     """
+
     def print(self, printable : str, index = tk.END):
         self.terminal['state'] = tk.NORMAL
         self.terminal.insert(index, printable)
         self.terminal['state'] = tk.DISABLED
+        self.terminal.see(tk.END)
         self.update()
+    
     """
     write
 
     Writes whatever was given as writable into a csv file
     """
+
     def write(self, writable : list):
         #writable.insert(0, datetime.time.microseconds())
         self.outfileWritable.writerow(writable)
+    
     """
     bluetoothDaemon
 
     Runs a daemon that looks for a command and runs a certain function given the command
     """
+
     async def bluetoothDaemon(self):
         global glb_command
         while(self.isActive):
@@ -385,17 +432,27 @@ class FlexSense_Gui(tk.Tk):
                 task = asyncio.create_task(self.capture_bluetooth())
                 await task
             await asyncio.sleep(0)
+
     """
     clockDaemon
 
     Clock for sample rate. Adds delay according to samplerate variable. Changes variable can_take when it is ready to take data.
     """
+
     async def clockDaemon(self):
         while(self.isActive):
-            self.can_take = False
-            await asyncio.sleep(0.01/self.samplerate - 0.0005)
-            self.can_take = True
-            await asyncio.sleep(0.0005)
+            #self.time = time.time()
+            #self.can_take = False
+            #await asyncio.sleep(1/self.samplerate - 0.0005)
+            #await asyncio.sleep(0.1/240)
+            #self.can_take = True
+            await asyncio.sleep(0)
+
+    """
+    timeDaemon
+
+    Daemon for the built in timer for labels
+    """
 
     async def timeDaemon(self):
         self.timeStarted = False
@@ -456,6 +513,7 @@ class FlexSense_Gui(tk.Tk):
 
     Deletes the object and closes all daemons
     """
+
     def destroy(self):
         self.isActive = False
         tk.Tk.destroy(self)
@@ -465,13 +523,13 @@ if __name__ == "__main__":
         app = FlexSense_Gui()
         await app.construct_gui()
         task1 = asyncio.create_task(app.bluetoothDaemon())
-        task2 = asyncio.create_task(app.clockDaemon())
+        #task2 = asyncio.create_task(app.clockDaemon())
         task3 = asyncio.create_task(app.timeDaemon())
         def endProg():
             app.destroy()
         app.protocol('WM_DELETE_WINDOW', endProg)
         await task1
-        await task2
+        #await task2
         await task3
         
 
