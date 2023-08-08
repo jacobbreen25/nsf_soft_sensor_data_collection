@@ -102,10 +102,10 @@ class FlexSense_Gui(tk.Tk):
             for p in serial.tools.list_ports.comports():
                 self.mocapList.append(p)
             for option in self.mocapList:
-                self.dMocapList['menu'].add_command(label=option, command=tk._setit(self.mocapList, option))
+                self.dMocapList['menu'].add_command(label=option, command=tk._setit(self.mocapCOM, option))
             self.print("COM Options Reset\n")
         lMocapList = tk.Label(master=f[-1], text="Choose COM Port if using MOCAP ")
-        self.dMocapList = ttk.OptionMenu(f[-1], self.mocapCOM, 'None', *self.mocapList)
+        self.dMocapList = ttk.OptionMenu(f[-1], self.mocapCOM, self.mocapList, *self.mocapList)
         bMocapReset = tk.Button(master=f[-1], text="Update COM Options", command=lambda: acquireCOMList(), width=20)
         lMocapList.pack(side=tk.LEFT, pady=5)
         self.dMocapList.pack(side=tk.LEFT, pady=5)
@@ -254,7 +254,13 @@ class FlexSense_Gui(tk.Tk):
         self.update()
         if(self.bBluetooth['text'] != "Disconnect Bluetooth"):
             self.print("Connection processing...\n")
-            devices = await BleakScanner.discover()
+            try:
+                devices = await BleakScanner.discover()
+            except OSError as e:
+                if e.strerror == "The device is not ready for use":
+                    self.bBluetooth['state'] = tk.NORMAL
+                    self.print("Bluetooth adapter not accessible; Is the Bluetooth adapter turned off?")
+                    return
             for d in devices:
                 #self.print(str(d) + "\n")
                 if d.name == name:
@@ -322,7 +328,10 @@ class FlexSense_Gui(tk.Tk):
         if(self.bTesting['text'] == "Begin Testing"):
             self.print("Beginning Test...\n")
             if (self.bleClient.is_connected):
-                with open(self.experimentPath + self.eFileName.get() + datetime.now().strftime("%m_%d_%Y-%H_%M") + ".csv",
+                if self.experimentPath == "":
+                    self.print("File path not set, please set and try again")
+                    return
+                with open(self.experimentPath + self.eFileName.get() + datetime.now().strftime("%m_%d_%Y-%H_%M_%S") + ".csv",
                 'w+',newline='') as self.outfile:
                     self.outfileWritable = csv.writer(self.outfile)
                     try:
@@ -333,9 +342,9 @@ class FlexSense_Gui(tk.Tk):
                             port_name = self.mocapCOM.get()
                             port_name  = port_name[:port_name.find('-') - 1]
                             if port_name != '':
-                                serial = serial.Serial(port=port_name, baudrate=300)
-                                serial.write(1)
-                                serial.close()
+                                mocap = serial.Serial(port=port_name, baudrate=300)
+                                mocap.write(1)
+                                mocap.close()
                         self.lastPacketTime = None
                         await self.bleClient.start_notify(self.dataChar, callback= self.callback)
                         await asyncio.sleep(0)
