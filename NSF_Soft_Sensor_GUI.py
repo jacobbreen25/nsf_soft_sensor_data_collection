@@ -31,7 +31,6 @@ class FlexSense_Gui(tk.Tk):
         self.samplerate = 60
         tk.Tk.__init__(self, *args, **kwargs)
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
-        self.label = "Idle"
         self.mocapList = []
         self.can_take = bool
         self.startTime = float
@@ -65,11 +64,33 @@ class FlexSense_Gui(tk.Tk):
         self.title("NSF Soft Sensor Data Collection")
         self.resizable()
         self.tasks = []
-        icon = tk.PhotoImage(file="uml-logo.png")
-        self.iconphoto(False, icon)
+        #icon = tk.PhotoImage(file="uml-logo.png")
+        #self.iconphoto(False, icon)
+
+        s = ttk.Style()
+        s.theme_use('alt')
+        s.configure("red.Horizontal.TProgressbar", background='red')
+        s.configure("yellow.Horizontal.TProgressbar", background='yellow')
+        s.configure("green.Horizontal.TProgressbar", background='green')
+
+        BatteryFrame = tk.Frame(master=self)
+        self.vBattery = tk.IntVar(master=self, value=0)
+        lBatteryLabel = tk.Label(master=BatteryFrame, text="Battery Level")
+        self.pbBattery = ttk.Progressbar(master=BatteryFrame, orient='horizontal', mode="determinate", name="battery percentage", variable=self.vBattery, style='green.Horizontal.TProgressbar')
+        lBattery = tk.Label(master=BatteryFrame, textvariable=self.vBattery)
+        lPercent = tk.Label(master=BatteryFrame, text="%")
+        #sTestScale = tk.Scale(master=BatteryFrame, variable=self.vBattery)
+        lBatteryLabel.grid(column=0, row=0)
+        self.pbBattery.grid(column=0, row=1)
+        lBattery.grid(column=1, row=1)
+        lPercent.grid(column=2, row=1)
+        #lHeader = tk.Label(master=BatteryFrame, text="NSF Soft Sensor Data Collection", font=self.title_font, anchor='ne')
+        #lHeader.grid(column=4, row=1, padx=5)
+
+        #sTestScale.pack(side=tk.LEFT, pady=5)
 
         f = [tk.Frame(master=self)]
-        lHeader = tk.Label(master=f[-1], text="NSF Soft Sensor Data Collection", font=self.title_font)
+        lHeader = tk.Label(master=f[-1], text="NSF Soft Sensor Data Collection", font=self.title_font, anchor='center')
         lHeader.pack(side=tk.LEFT, pady=5)
 
         f.append(tk.Frame(master=self))
@@ -155,7 +176,7 @@ class FlexSense_Gui(tk.Tk):
         def setLabel(button, label):
             self.disabledButton['state'] = tk.NORMAL
             self.disabledButton = button
-            self.label = label
+            self.vLabel.set(label)
             self.disabledButton['state'] = tk.DISABLED
             return
         self.bIdle.pack(side=tk.LEFT, pady=5, padx=5)
@@ -179,18 +200,62 @@ class FlexSense_Gui(tk.Tk):
         self.spHours.set(0)
         self.spMinutes.set(0)
         self.spSeconds.set(0)
-        self.spHours.pack(side=tk.LEFT, pady=5, padx=5)
-        self.spMinutes.pack(side=tk.LEFT, pady=5, padx=5)
-        self.spSeconds.pack(side=tk.LEFT, pady=5, padx=5)
-
-        f.append(tk.Frame(master=self))
+        self.spHours.grid(column=0, row=0, padx=5, pady=5)
+        self.spMinutes.grid(column=1, row=0, padx=5, pady=5)
+        self.spSeconds.grid(column=2, row=0, padx=5, pady=5)
         lHours = tk.Label(master=f[-1], text="Hours")
         lMinutes = tk.Label(master=f[-1], text="Minutes")
         lSeconds = tk.Label(master=f[-1], text="Seconds")
-        lHours.pack(side=tk.LEFT, pady=5, padx=5)
-        lMinutes.pack(side=tk.LEFT, pady=5, padx=5)
-        lSeconds.pack(side=tk.LEFT, pady=5, padx=5)
+        lHours.grid(column=0, row=1, padx=5, pady=5)
+        lMinutes.grid(column=1, row=1, padx=5, pady=5)
+        lSeconds.grid(column=2, row=1, padx=5, pady=5)
 
+        f.append(tk.Frame(master=self))
+        lDataLabel1 = tk.Label(master=f[-1], text="Sensor 1")
+        lDataLabel1.grid(column=0, row=0, padx=5, pady=5)
+        lDataLabel2 = tk.Label(master=f[-1], text="Sensor 2")
+        lDataLabel2.grid(column=1, row=0, padx=5, pady=5)
+        lDataLabel3 = tk.Label(master=f[-1], text="Sensor 3")
+        lDataLabel3.grid(column=2, row=0, padx=5, pady=5)
+        lDataLabel4 = tk.Label(master=f[-1], text="Sensor 4")
+        lDataLabel4.grid(column=3, row=0, padx=5, pady=5)
+        lDataLabel5 = tk.Label(master=f[-1], text="Sensor 5")
+        lDataLabel5.grid(column=4, row=0, padx=5, pady=5)
+        lDataLabel6 = tk.Label(master=f[-1], text="Sensor 6")
+        lDataLabel6.grid(column=5, row=0, padx=5, pady=5)
+        lDataLabel7 = tk.Label(master=f[-1], text="Sensor 7")
+        lDataLabel7.grid(column=6, row=0, padx=5, pady=5)
+        lDataLabel8 = tk.Label(master=f[-1], text="Sensor 8")
+        lDataLabel8.grid(column=7, row=0, padx=5, pady=5)
+        lLabelLabel = tk.Label(master=f[-1], text="Label")
+        lLabelLabel.grid(column=8, row=0, padx=5, pady=5)
+        self.vData0 = tk.StringVar(master=f[-1], value=0)
+        self.lData0 = tk.Label(master=f[-1], textvariable=self.vData0, anchor=tk.CENTER)
+        self.lData0.grid(column=0, row=1, padx=5, pady=5)
+        self.vData1 = tk.StringVar(master=f[-1], value=0)
+        self.lData1 = tk.Label(master=f[-1], textvariable=self.vData1, anchor=tk.CENTER)
+        self.lData1.grid(column=1, row=1, padx=5, pady=5)
+        self.vData2 = tk.StringVar(master=f[-1], value=0)
+        self.lData2 = tk.Label(master=f[-1], textvariable=self.vData2, anchor=tk.CENTER)
+        self.lData2.grid(column=2, row=1, padx=5, pady=5)
+        self.vData3 = tk.StringVar(master=f[-1], value=0)
+        self.lData3 = tk.Label(master=f[-1], textvariable=self.vData3, anchor=tk.CENTER)
+        self.lData3.grid(column=3, row=1, padx=5, pady=5)
+        self.vData4 = tk.StringVar(master=f[-1], value=0)
+        self.lData4 = tk.Label(master=f[-1], textvariable=self.vData4, anchor=tk.CENTER)
+        self.lData4.grid(column=4, row=1, padx=5, pady=5)
+        self.vData5 = tk.StringVar(master=f[-1], value=0)
+        self.lData5 = tk.Label(master=f[-1], textvariable=self.vData5, anchor=tk.CENTER)
+        self.lData5.grid(column=5, row=1, padx=5, pady=5)
+        self.vData6 = tk.StringVar(master=f[-1], value=0)
+        self.lData6 = tk.Label(master=f[-1], textvariable=self.vData6, anchor=tk.CENTER)
+        self.lData6.grid(column=6, row=1, padx=5, pady=5)
+        self.vData7 = tk.StringVar(master=f[-1], value=0)
+        self.lData7 = tk.Label(master=f[-1], textvariable=self.vData7, anchor=tk.CENTER)
+        self.lData7.grid(column=7, row=1, padx=5, pady=5)
+        self.vLabel = tk.StringVar(master=f[-1], value="Idle")
+        self.lLabel = tk.Label(master= f[-1], textvariable=self.vLabel, anchor=tk.CENTER)
+        self.lLabel.grid(column=8, row=1, padx=5, pady=5)
 
         f.append(tk.Frame(master=self))
         hor = tk.Scrollbar(f[-1], orient="horizontal")
@@ -207,6 +272,7 @@ class FlexSense_Gui(tk.Tk):
 
         acquireCOMList()
 
+        BatteryFrame.pack(anchor="nw", padx=5)
         for task in self.tasks:
             await task
         for frame in f:
@@ -306,11 +372,19 @@ class FlexSense_Gui(tk.Tk):
         data_array = d.decode().rstrip().split('\t')
         currenttime = int(data_array[0])
         if (self.lastPacketTime is None or currenttime - self.lastPacketTime >= (1000 - 130)/int(self.samplerate)):
-            data_array.append(self.label)
+            data_array.append(self.vLabel.get())
             self.clearln()
             self.print("\n")
-            self.print(data_array)
+            #self.print(data_array)
             self.write(data_array)
+            self.vData0.set(data_array[1])
+            self.vData1.set(data_array[2])
+            self.vData2.set(data_array[3])
+            self.vData3.set(data_array[4])
+            self.vData4.set(data_array[5])
+            self.vData5.set(data_array[6])
+            self.vData6.set(data_array[7])
+            self.vData7.set(data_array[8])
             self.lastPacketTime = currenttime
             #print("Final Time:" + str(time.time()))
 
@@ -329,7 +403,10 @@ class FlexSense_Gui(tk.Tk):
             self.print("Beginning Test...\n")
             if (self.bleClient.is_connected):
                 if self.experimentPath == "":
-                    self.print("File path not set, please set and try again")
+                    self.print("File path not set, please set and try again\n")
+                    self.bTesting['state'] = tk.NORMAL
+                    self.sHz['state'] = tk.NORMAL
+                    self.bBluetooth['state'] = tk.NORMAL
                     return
                 with open(self.experimentPath + self.eFileName.get() + datetime.now().strftime("%m_%d_%Y-%H_%M_%S") + ".csv",
                 'w+',newline='') as self.outfile:
@@ -345,6 +422,7 @@ class FlexSense_Gui(tk.Tk):
                                 mocap = serial.Serial(port=port_name, baudrate=300)
                                 mocap.write(1)
                                 mocap.close()
+                        self.outfileWritable.writerow(["Time","Data 0", "Data 1", "Data 2", "Data 3", "Data 4", "Data 5", "Data 6", "Data 7", "Label"])
                         self.lastPacketTime = None
                         await self.bleClient.start_notify(self.dataChar, callback= self.callback)
                         await asyncio.sleep(0)
@@ -460,7 +538,7 @@ class FlexSense_Gui(tk.Tk):
                     self.spSeconds['state'] = tk.NORMAL
                     self.disabledButton['state'] = tk.NORMAL
                     self.disabledButton = self.bIdle
-                    self.label = "Idle"
+                    self.vLabel.set("Idle")
                     self.disabledButton['state'] = tk.DISABLED
                     self.timeStarted = False
                     self.print("Label time has finished\n")
